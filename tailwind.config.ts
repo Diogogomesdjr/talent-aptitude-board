@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				matrix: {
+					'level-1': '#ea384c',      // Red - Level 1
+					'level-2': '#FFDEE2',      // Light Red - Level 2
+					'level-3': '#FEF7CD',      // Yellow - Level 3
+					'level-4': '#F2FCE2',      // Light Green - Level 4
+					'level-5': '#83c76f',      // Green - Level 5
+					'na': '#8E9196',           // Gray - N/A
+					'accent': '#9b87f5',       // Purple accent
 				}
 			},
 			borderRadius: {
