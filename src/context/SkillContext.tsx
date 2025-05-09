@@ -15,12 +15,19 @@ export interface CollaboratorSkill {
   isApt: boolean;
 }
 
+export interface FunctionRole {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface Collaborator {
   id: string;
   name: string;
   photoUrl: string;
   isPontoCentral: boolean;
   isAptForRole: boolean;
+  functionRoleId?: string;
   teamId?: string;
   skills: Record<string, CollaboratorSkill>;
 }
@@ -34,6 +41,7 @@ interface SkillContextType {
   skills: Skill[];
   collaborators: Collaborator[];
   teams: Team[];
+  functionRoles: FunctionRole[];
   addSkill: (name: string, category: SkillCategory) => void;
   updateSkill: (id: string, name: string, category: SkillCategory) => void;
   deleteSkill: (id: string) => void;
@@ -50,6 +58,11 @@ interface SkillContextType {
   toggleCollaboratorAptForRole: (id: string) => void;
   getSkill: (id: string) => Skill | undefined;
   getTeam: (id: string) => Team | undefined;
+  getFunctionRole: (id: string) => FunctionRole | undefined;
+  addFunctionRole: (name: string, description?: string) => void;
+  updateFunctionRole: (id: string, name: string, description?: string) => void;
+  deleteFunctionRole: (id: string) => void;
+  assignFunctionRole: (collaboratorId: string, functionRoleId: string) => void;
 }
 
 const SkillContext = createContext<SkillContextType | undefined>(undefined);
@@ -84,6 +97,14 @@ export const SkillProvider = ({ children }: SkillProviderProps) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [functionRoles, setFunctionRoles] = useState<FunctionRole[]>(() => {
+    const saved = localStorage.getItem("functionRoles");
+    return saved ? JSON.parse(saved) : [
+      { id: generateId(), name: "Aplicação", description: "Aplicação prática da habilidade" },
+      { id: generateId(), name: "Especificação Técnica", description: "Criação de documentação e especificações técnicas" }
+    ];
+  });
+
   useEffect(() => {
     localStorage.setItem("skills", JSON.stringify(skills));
   }, [skills]);
@@ -95,6 +116,10 @@ export const SkillProvider = ({ children }: SkillProviderProps) => {
   useEffect(() => {
     localStorage.setItem("teams", JSON.stringify(teams));
   }, [teams]);
+
+  useEffect(() => {
+    localStorage.setItem("functionRoles", JSON.stringify(functionRoles));
+  }, [functionRoles]);
 
   const addSkill = (name: string, category: SkillCategory) => {
     const newSkill: Skill = {
@@ -237,10 +262,46 @@ export const SkillProvider = ({ children }: SkillProviderProps) => {
     return teams.find(team => team.id === id);
   };
 
+  // Function Role Management
+  const getFunctionRole = (id: string) => {
+    return functionRoles.find(role => role.id === id);
+  };
+
+  const addFunctionRole = (name: string, description?: string) => {
+    const newRole: FunctionRole = {
+      id: generateId(),
+      name,
+      description
+    };
+    setFunctionRoles([...functionRoles, newRole]);
+  };
+
+  const updateFunctionRole = (id: string, name: string, description?: string) => {
+    setFunctionRoles(functionRoles.map(role => 
+      role.id === id ? { ...role, name, description } : role
+    ));
+  };
+
+  const deleteFunctionRole = (id: string) => {
+    setFunctionRoles(functionRoles.filter(role => role.id !== id));
+    
+    // Remove functionRoleId from collaborators with this role
+    setCollaborators(collaborators.map(collaborator => 
+      collaborator.functionRoleId === id ? { ...collaborator, functionRoleId: undefined } : collaborator
+    ));
+  };
+
+  const assignFunctionRole = (collaboratorId: string, functionRoleId: string) => {
+    setCollaborators(collaborators.map(collaborator => 
+      collaborator.id === collaboratorId ? { ...collaborator, functionRoleId } : collaborator
+    ));
+  };
+
   const value = {
     skills,
     collaborators,
     teams,
+    functionRoles,
     addSkill,
     updateSkill,
     deleteSkill,
@@ -256,7 +317,12 @@ export const SkillProvider = ({ children }: SkillProviderProps) => {
     togglePontoCentral,
     toggleCollaboratorAptForRole,
     getSkill,
-    getTeam
+    getTeam,
+    getFunctionRole,
+    addFunctionRole,
+    updateFunctionRole,
+    deleteFunctionRole,
+    assignFunctionRole
   };
 
   return <SkillContext.Provider value={value}>{children}</SkillContext.Provider>;

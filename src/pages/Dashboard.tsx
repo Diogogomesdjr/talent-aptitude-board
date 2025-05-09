@@ -13,15 +13,12 @@ import {
 import { SkillProvider } from "@/context/SkillContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Users, BarChart, TrendingUp, InsightsIcon } from "lucide-react";
+import { LogOut, User, Users, BarChart, TrendingUp } from "lucide-react";
 import CollaboratorsSection from "@/components/CollaboratorsSection";
 import TeamsSection from "@/components/TeamsSection";
 import SkillsSection from "@/components/SkillsSection";
 import RecognitionSection from "@/components/RecognitionSection";
 import InsightsSection from "@/components/InsightsSection";
-
-// Mock data for InsightsIcon since it doesn't exist in lucide-react
-const InsightsIcon = () => <TrendingUp />;
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("collaborators");
@@ -109,8 +106,8 @@ const Dashboard = () => {
                     onClick={() => setActiveSection("insights")} 
                     isActive={activeSection === "insights"}
                   >
-                    <InsightsIcon />
-                    <span className="ml-2">Insights</span>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    <span>Insights</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

@@ -50,6 +50,9 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
   const { 
     skills, 
     getTeam, 
+    getFunctionRole,
+    functionRoles,
+    assignFunctionRole,
     togglePontoCentral,
     deleteCollaborator,
     toggleCollaboratorAptForRole,
@@ -63,6 +66,7 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
   const [addSkillDialogOpen, setAddSkillDialogOpen] = useState(false);
   
   const team = collaborator.teamId ? getTeam(collaborator.teamId) : undefined;
+  const functionRole = collaborator.functionRoleId ? getFunctionRole(collaborator.functionRoleId) : undefined;
   
   const ratingColors = {
     "1": "#ea384c",
@@ -131,7 +135,10 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
                   <Flag className="h-4 w-4 text-blue-500" aria-label="Ponto Focal" />
                 )}
               </div>
-              {team && <p className="text-sm text-gray-500">Equipe: {team.name}</p>}
+              <div className="flex flex-col text-xs text-gray-500">
+                {team && <span>Equipe: {team.name}</span>}
+                {functionRole && <span>Função: {functionRole.name}</span>}
+              </div>
             </div>
           </div>
           
@@ -178,25 +185,45 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
             <div className="flex flex-wrap justify-between gap-4">
               <div className="space-y-2">
                 <h4 className="font-medium">Status</h4>
-                <div className="flex items-center gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="ponto-focal"
+                      id={`ponto-focal-${collaborator.id}`}
                       checked={collaborator.isPontoCentral}
                       onCheckedChange={() => togglePontoCentral(collaborator.id)}
                     />
-                    <Label htmlFor="ponto-focal">Ponto Focal</Label>
+                    <Label htmlFor={`ponto-focal-${collaborator.id}`}>Ponto Focal</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="apt-for-role"
+                      id={`apt-for-role-${collaborator.id}`}
                       checked={collaborator.isAptForRole}
                       onCheckedChange={() => toggleCollaboratorAptForRole(collaborator.id)}
                     />
-                    <Label htmlFor="apt-for-role">Apto para Função</Label>
+                    <Label htmlFor={`apt-for-role-${collaborator.id}`}>Apto para Função</Label>
                   </div>
                 </div>
               </div>
+              
+              <div className="space-y-2">
+                <h4 className="font-medium">Função</h4>
+                <Select 
+                  value={collaborator.functionRoleId} 
+                  onValueChange={(value) => assignFunctionRole(collaborator.id, value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Selecione uma função" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {functionRoles.map(role => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="flex gap-2">
                 <Dialog open={addSkillDialogOpen} onOpenChange={setAddSkillDialogOpen}>
                   <DialogTrigger asChild>
