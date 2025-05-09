@@ -6,19 +6,20 @@ import {
   SidebarContent, 
   SidebarHeader, 
   SidebarMenu, 
-  SidebarMenuButton, 
   SidebarMenuItem, 
+  SidebarMenuButton, 
   SidebarTrigger
 } from "@/components/ui/sidebar";
 import { SkillProvider } from "@/context/SkillContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Users, BarChart, TrendingUp } from "lucide-react";
+import { LogOut, User, Users, BarChart, TrendingUp, Briefcase } from "lucide-react";
 import CollaboratorsSection from "@/components/CollaboratorsSection";
 import TeamsSection from "@/components/TeamsSection";
 import SkillsSection from "@/components/SkillsSection";
 import RecognitionSection from "@/components/RecognitionSection";
 import InsightsSection from "@/components/InsightsSection";
+import FunctionRolesSection from "@/components/FunctionRolesSection";
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("collaborators");
@@ -36,6 +37,8 @@ const Dashboard = () => {
         return <RecognitionSection />;
       case "insights":
         return <InsightsSection />;
+      case "functionRoles":
+        return <FunctionRolesSection />;
       default:
         return <CollaboratorsSection />;
     }
@@ -90,6 +93,15 @@ const Dashboard = () => {
                   >
                     <BarChart className="mr-2 h-4 w-4" />
                     <span>Habilidades</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    onClick={() => setActiveSection("functionRoles")} 
+                    isActive={activeSection === "functionRoles"}
+                  >
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    <span>Funções</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
