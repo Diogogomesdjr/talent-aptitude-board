@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   SidebarProvider, 
@@ -14,7 +13,7 @@ import { SkillProvider } from "@/context/SkillContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Users, BarChart, TrendingUp, Briefcase } from "lucide-react";
-import CollaboratorsSection from "@/components/CollaboratorsSection";
+import CollaboratorsSection from "@/components/collaborators/CollaboratorsSection";
 import TeamsSection from "@/components/TeamsSection";
 import SkillsSection from "@/components/SkillsSection";
 import RecognitionSection from "@/components/RecognitionSection";
