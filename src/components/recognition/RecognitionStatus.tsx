@@ -17,11 +17,11 @@ interface RecognitionStatusProps {
 
 const RecognitionStatus = ({ isEligible, highLevelSkills, skillStats }: RecognitionStatusProps) => {
   return (
-    <div className="bg-gray-50 p-4 rounded-md">
+    <div className="bg-white p-4 rounded-lg shadow-sm border">
       <div className="mb-4">
         <div 
           className={`inline-block py-1 px-3 rounded-full text-white ${
-            isEligible ? "bg-green-500" : "bg-gray-500"
+            isEligible ? "bg-green-600" : "bg-gray-500"
           }`}
         >
           {isEligible ? "Elegível para Reconhecimento" : "Não Elegível"}
@@ -34,7 +34,7 @@ const RecognitionStatus = ({ isEligible, highLevelSkills, skillStats }: Recognit
           <h5 className="font-medium mb-2">Áreas de Excelência</h5>
           <div className="flex flex-wrap gap-2">
             {highLevelSkills.map(skill => (
-              <Badge key={skill.id} className="bg-green-100 text-green-800 hover:bg-green-200">
+              <Badge key={skill.id} className="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100">
                 {skill.name} (Nível {skill.rating})
               </Badge>
             ))}
@@ -45,18 +45,18 @@ const RecognitionStatus = ({ isEligible, highLevelSkills, skillStats }: Recognit
       {/* Stats summary */}
       <div>
         <h5 className="font-medium mb-2">Estatísticas de Habilidades</h5>
-        <div className="grid grid-cols-3 gap-2 text-sm">
-          <div className="bg-white p-2 rounded">
-            <div className="font-bold">{skillStats.level5Count}</div>
-            <div className="text-gray-500">Nível 5</div>
+        <div className="grid grid-cols-3 gap-3 text-sm">
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="font-bold text-lg">{skillStats.level5Count}</div>
+            <div className="text-gray-600">Nível 5</div>
           </div>
-          <div className="bg-white p-2 rounded">
-            <div className="font-bold">{skillStats.level4Count}</div>
-            <div className="text-gray-500">Nível 4</div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="font-bold text-lg">{skillStats.level4Count}</div>
+            <div className="text-gray-600">Nível 4</div>
           </div>
-          <div className="bg-white p-2 rounded">
-            <div className="font-bold">{skillStats.aptSkillsCount}</div>
-            <div className="text-gray-500">Habilidades Aptas</div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="font-bold text-lg">{skillStats.aptSkillsCount}</div>
+            <div className="text-gray-600">Habilidades Aptas</div>
           </div>
         </div>
       </div>

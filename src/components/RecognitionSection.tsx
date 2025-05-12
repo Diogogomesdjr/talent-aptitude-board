@@ -2,7 +2,6 @@
 import { useSkillContext } from "@/context/SkillContext";
 import { useState, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import RecognitionFilters from "./recognition/RecognitionFilters";
 import RecognitionRules from "./recognition/RecognitionRules";
 import RecognitionCollapseButton from "./recognition/RecognitionCollapseButton";
@@ -19,7 +18,7 @@ import {
 const RecognitionSection = () => {
   const { collaborators, skills, getTeam, getSkill } = useSkillContext();
   const [filter, setFilter] = useState<string>("all");
-  const [allCollapsed, setAllCollapsed] = useState(false);
+  const [allCollapsed, setAllCollapsed] = useState(true);
   const [collapsedStates, setCollapsedStates] = useState<Record<string, boolean>>({});
 
   // Initialize collapsed states
@@ -58,68 +57,66 @@ const RecognitionSection = () => {
   });
   
   return (
-    <TooltipProvider>
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Reconhecimento</h2>
-          <RecognitionFilters filter={filter} setFilter={setFilter} />
-        </div>
-        
-        <RecognitionRules />
-        
-        <div className="flex justify-end mb-4">
-          <RecognitionCollapseButton 
-            allCollapsed={allCollapsed} 
-            onClick={toggleAllCollapsed} 
-          />
-        </div>
-        
-        {filteredCollaborators.length === 0 ? (
-          <NoCollaboratorsFound />
-        ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {filteredCollaborators.map(collaborator => {
-              const aptitudePercentage = calculateAptitudePercentage(collaborator);
-              const team = collaborator.teamId ? getTeam(collaborator.teamId) : undefined;
-              const levelCount = getCollaboratorLevelCount(collaborator);
-              const isCollapsed = collapsedStates[collaborator.id] ?? false;
-              const isHighPotentialCollaborator = isHighPotential(collaborator);
-              
-              const skillsWithLevels = Object.entries(collaborator.skills)
-                .filter(([skillId]) => getSkill(skillId))
-                .map(([skillId, skillData]) => {
-                  const skill = getSkill(skillId)!;
-                  return {
-                    ...skill,
-                    ...skillData
-                  };
-                });
-              
-              const highLevelSkills = skillsWithLevels.filter(skill => 
-                typeof skill.rating === 'number' && skill.rating >= 4 && skill.isApt
-              );
-
-              return (
-                <CollaboratorCard
-                  key={collaborator.id}
-                  collaborator={collaborator}
-                  isCollapsed={isCollapsed}
-                  toggleCollapsed={toggleCollapsed}
-                  team={team}
-                  aptitudePercentage={aptitudePercentage}
-                  isEligibleForRecognition={isEligibleForRecognition(collaborator)}
-                  isHighPotential={isHighPotentialCollaborator}
-                  needsAttention={needsAttention(collaborator)}
-                  skillsWithLevels={skillsWithLevels}
-                  highLevelSkills={highLevelSkills}
-                  levelCount={levelCount}
-                />
-              );
-            })}
-          </div>
-        )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Reconhecimento</h2>
+        <RecognitionCollapseButton 
+          allCollapsed={allCollapsed} 
+          onClick={toggleAllCollapsed}
+        />
       </div>
-    </TooltipProvider>
+      
+      <RecognitionFilters filter={filter} setFilter={setFilter} />
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <RecognitionRules />
+      </div>
+      
+      {filteredCollaborators.length === 0 ? (
+        <NoCollaboratorsFound />
+      ) : (
+        <div className="space-y-4">
+          {filteredCollaborators.map(collaborator => {
+            const aptitudePercentage = calculateAptitudePercentage(collaborator);
+            const team = collaborator.teamId ? getTeam(collaborator.teamId) : undefined;
+            const levelCount = getCollaboratorLevelCount(collaborator);
+            const isCollapsed = collapsedStates[collaborator.id] ?? false;
+            const isHighPotentialCollaborator = isHighPotential(collaborator);
+            
+            const skillsWithLevels = Object.entries(collaborator.skills)
+              .filter(([skillId]) => getSkill(skillId))
+              .map(([skillId, skillData]) => {
+                const skill = getSkill(skillId)!;
+                return {
+                  ...skill,
+                  ...skillData
+                };
+              });
+            
+            const highLevelSkills = skillsWithLevels.filter(skill => 
+              typeof skill.rating === 'number' && skill.rating >= 4 && skill.isApt
+            );
+
+            return (
+              <CollaboratorCard
+                key={collaborator.id}
+                collaborator={collaborator}
+                isCollapsed={isCollapsed}
+                toggleCollapsed={toggleCollapsed}
+                team={team}
+                aptitudePercentage={aptitudePercentage}
+                isEligibleForRecognition={isEligibleForRecognition(collaborator)}
+                isHighPotential={isHighPotentialCollaborator}
+                needsAttention={needsAttention(collaborator)}
+                skillsWithLevels={skillsWithLevels}
+                highLevelSkills={highLevelSkills}
+                levelCount={levelCount}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

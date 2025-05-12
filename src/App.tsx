@@ -10,7 +10,16 @@ import Register from "./pages/Register";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Cria o cliente de consulta para React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+    },
+  },
+});
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -28,7 +37,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <Toaster />
-        <Sonner />
+        <Sonner position="top-right" closeButton richColors />
         <BrowserRouter>
           <Routes>
             <Route 

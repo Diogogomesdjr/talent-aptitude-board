@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useSkillContext } from "@/context/SkillContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Import newly created components
 import NoInsightsFound from "./insights/NoInsightsFound";
@@ -25,25 +24,27 @@ const InsightsSection = () => {
   const teamInsights = generateTeamInsights(teams, collaborators, getSkill);
   
   return (
-    <TooltipProvider>
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Insights</h2>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Insights</h2>
+      </div>
+      
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="all">Visão Geral</TabsTrigger>
+            <TabsTrigger value="development">Desenvolvimento</TabsTrigger>
+            <TabsTrigger value="team">Por Equipe</TabsTrigger>
+          </TabsList>
         </div>
         
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="all">Visão Geral</TabsTrigger>
-            <TabsTrigger value="development">Áreas de Desenvolvimento</TabsTrigger>
-            <TabsTrigger value="team">Insights por Equipe</TabsTrigger>
-          </TabsList>
-          
+        <div className="mt-6">
           {/* Tab de visão geral - mostra insights por colaborador */}
           <TabsContent value="all">
             {collaboratorInsights.length === 0 ? (
               <NoInsightsFound message="Não há insights disponíveis. Adicione mais habilidades aos colaboradores." />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {collaboratorInsights.map((collaboratorInsight) => (
                   <CollaboratorInsightCard 
                     key={collaboratorInsight.collaboratorId}
@@ -56,7 +57,7 @@ const InsightsSection = () => {
           
           {/* Tab de desenvolvimento - mostra habilidades que precisam ser desenvolvidas */}
           <TabsContent value="development">
-            <div className="space-y-8">
+            <div className="space-y-6">
               {Object.keys(skillsNeedingDevelopment).length === 0 ? (
                 <NoInsightsFound message="Não há dados suficientes para análise. Adicione mais habilidades aos colaboradores." />
               ) : (
@@ -76,7 +77,7 @@ const InsightsSection = () => {
             {teamInsights.length === 0 ? (
               <NoInsightsFound message="Não há equipes com dados suficientes para análise." />
             ) : (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {teamInsights.map(team => (
                   <TeamInsightCard
                     key={team.teamId}
@@ -86,9 +87,9 @@ const InsightsSection = () => {
               </div>
             )}
           </TabsContent>
-        </Tabs>
-      </div>
-    </TooltipProvider>
+        </div>
+      </Tabs>
+    </div>
   );
 };
 
