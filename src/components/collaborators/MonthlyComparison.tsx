@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSkillContext } from "@/context/SkillContext";
-import { format, subMonths, parse } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TrendingUp, TrendingDown, Minus, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,8 +17,11 @@ interface MonthlyComparisonProps {
 }
 
 const MonthlyComparison = ({ selectedDate, filteredCollaborators }: MonthlyComparisonProps) => {
-  const { useCollaboratorsData } = useSkillContext();
-  const { getPreviousMonthData, calculateCurrentMetrics, saveMonthlySnapshot } = useCollaboratorsData();
+  const { 
+    getPreviousMonthData, 
+    calculateCurrentMetrics, 
+    saveMonthlySnapshot 
+  } = useSkillContext();
   
   const [isLoading, setIsLoading] = useState(true);
   const [previousMonthData, setPreviousMonthData] = useState<any>(null);
@@ -94,7 +97,7 @@ const MonthlyComparison = ({ selectedDate, filteredCollaborators }: MonthlyCompa
   };
 
   // Formata o mês para exibição
-  const formatMonthDisplay = (monthNum: string) => {
+  const formatMonthDisplay = (monthNum: string | undefined) => {
     if (!monthNum) return "mês anterior";
     
     const monthDate = parse(monthNum, "MM", new Date());

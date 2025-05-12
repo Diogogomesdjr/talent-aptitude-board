@@ -39,6 +39,16 @@ interface SkillContextType {
   updateFunctionRole: (id: string, name: string, description?: string) => void;
   deleteFunctionRole: (id: string) => void;
   assignFunctionRole: (collaboratorId: string, functionRoleId: string) => void;
+  // Add the historical data functions from useCollaboratorsData
+  saveMonthlySnapshot: (date?: Date) => boolean;
+  getPreviousMonthData: (currentDate: Date) => any;
+  calculateCurrentMetrics: (filteredCollabs?: Collaborator[]) => {
+    skillAverage: number;
+    aptitudePercentage: number;
+    totalSkills: number;
+    totalSkillsByCategory: Record<string, number>;
+  };
+  historicalData: Record<string, any>;
 }
 
 const SkillContext = createContext<SkillContextType | undefined>(undefined);
