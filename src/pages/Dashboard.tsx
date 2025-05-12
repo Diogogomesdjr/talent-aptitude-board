@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   SidebarProvider, 
@@ -12,13 +13,14 @@ import {
 import { SkillProvider } from "@/context/SkillContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Users, BarChart, TrendingUp, Briefcase } from "lucide-react";
+import { LogOut, User, Users, BarChart, TrendingUp, Briefcase, UserCog } from "lucide-react";
 import CollaboratorsSection from "@/components/collaborators/CollaboratorsSection";
 import TeamsSection from "@/components/TeamsSection";
 import SkillsSection from "@/components/SkillsSection";
 import RecognitionSection from "@/components/RecognitionSection";
 import InsightsSection from "@/components/InsightsSection";
 import FunctionRolesSection from "@/components/FunctionRolesSection";
+import UsersManagementSection from "@/components/UsersManagementSection";
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("collaborators");
@@ -38,6 +40,8 @@ const Dashboard = () => {
         return <InsightsSection />;
       case "functionRoles":
         return <FunctionRolesSection />;
+      case "users":
+        return <UsersManagementSection />;
       default:
         return <CollaboratorsSection />;
     }
@@ -119,6 +123,15 @@ const Dashboard = () => {
                   >
                     <TrendingUp className="mr-2 h-4 w-4" />
                     <span>Insights</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    onClick={() => setActiveSection("users")} 
+                    isActive={activeSection === "users"}
+                  >
+                    <UserCog className="mr-2 h-4 w-4" />
+                    <span>Gerenciar Usuários</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

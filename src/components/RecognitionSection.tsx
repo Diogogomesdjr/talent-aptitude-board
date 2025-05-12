@@ -1,10 +1,11 @@
+
 import { useSkillContext } from "@/context/SkillContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
-import { CircleCheck, AlertTriangle, Flag, ChevronUp, ChevronDown } from "lucide-react";
+import { CircleCheck, AlertTriangle, Flag, ChevronUp, ChevronDown, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Tooltip, 
@@ -26,7 +27,7 @@ const RecognitionSection = () => {
       initialStates[c.id] = allCollapsed;
     });
     setCollapsedStates(initialStates);
-  }, [collaborators, allCollapsed]);
+  }, [allCollapsed, collaborators]);
 
   const toggleAllCollapsed = () => {
     const newAllCollapsed = !allCollapsed;
@@ -89,9 +90,24 @@ const RecognitionSection = () => {
     return percentage < 50;
   };
 
+  // Nova função para verificar se é alto potencial (todas as habilidades entre 4 e 5)
+  const isHighPotential = (collaboratorId: string) => {
+    const collaborator = collaborators.find(c => c.id === collaboratorId);
+    if (!collaborator || Object.keys(collaborator.skills).length === 0) return false;
+    
+    const allSkills = Object.values(collaborator.skills);
+    if (allSkills.length < 3) return false; // Precisamos de pelo menos 3 habilidades para considerar alto potencial
+    
+    // Verifica se todas as habilidades são 4 ou 5
+    return allSkills.every(skill => 
+      typeof skill.rating === 'number' && (skill.rating === 4 || skill.rating === 5)
+    );
+  };
+
   const filteredCollaborators = collaborators.filter(collab => {
     if (filter === "eligible") return isEligibleForRecognition(collab.id);
     if (filter === "attention") return needsAttention(collab.id);
+    if (filter === "highpotential") return isHighPotential(collab.id);
     return true;
   });
   
@@ -118,6 +134,15 @@ const RecognitionSection = () => {
               Elegíveis para Reconhecimento
             </Button>
             <Button 
+              variant={filter === "highpotential" ? "default" : "outline"}
+              onClick={() => setFilter("highpotential")}
+              className="flex items-center gap-1 text-sm"
+              size="sm"
+            >
+              <Star size={16} className="text-yellow-500" />
+              Alto Potencial
+            </Button>
+            <Button 
               variant={filter === "attention" ? "default" : "outline"}
               onClick={() => setFilter("attention")}
               className="flex items-center gap-1 text-sm"
@@ -133,6 +158,7 @@ const RecognitionSection = () => {
           <p className="mb-2"><strong>Regras de Reconhecimento:</strong></p>
           <ul className="list-disc list-inside space-y-2">
             <li>Colaboradores com <strong>mais de 75% de aptidão</strong> nas habilidades são elegíveis para reconhecimento.</li>
+            <li>Colaboradores com <strong>todas as habilidades entre níveis 4 e 5</strong> são considerados de Alto Potencial.</li>
             <li>A aptidão é medida pela capacidade de executar tarefas de forma independente, ensinar ou ser referência em uma habilidade.</li>
             <li>Colaboradores com <strong>menos de 50% de aptidão</strong> podem precisar de atenção e desenvolvimento adicional.</li>
           </ul>
@@ -162,6 +188,7 @@ const RecognitionSection = () => {
               const team = collaborator.teamId ? getTeam(collaborator.teamId) : undefined;
               const levelCount = getCollaboratorLevelCount(collaborator.id);
               const isCollapsed = collapsedStates[collaborator.id] ?? false;
+              const isHighPotentialCollaborator = isHighPotential(collaborator.id);
               
               const skillsWithLevels = Object.entries(collaborator.skills)
                 .filter(([skillId]) => getSkill(skillId))  // Ensure skill exists
@@ -180,7 +207,11 @@ const RecognitionSection = () => {
               return (
                 <Card 
                   key={collaborator.id}
-                  className={`${needsAttention(collaborator.id) ? "border-red-200" : isEligibleForRecognition(collaborator.id) ? "border-green-200" : ""}`}
+                  className={`${
+                    needsAttention(collaborator.id) ? "border-red-200" : 
+                    isHighPotentialCollaborator ? "border-yellow-200" : 
+                    isEligibleForRecognition(collaborator.id) ? "border-green-200" : ""
+                  }`}
                 >
                   <CardContent className="p-0">
                     <div className="flex justify-between items-center p-4 bg-gray-50 border-b">
@@ -199,6 +230,16 @@ const RecognitionSection = () => {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>Ponto Focal</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            {isHighPotentialCollaborator && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Star className="h-4 w-4 text-yellow-500" aria-label="Alto Potencial" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Alto Potencial</p>
                                 </TooltipContent>
                               </Tooltip>
                             )}

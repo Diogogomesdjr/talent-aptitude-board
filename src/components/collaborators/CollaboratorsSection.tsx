@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSkillContext } from "@/context/SkillContext";
 import CollaboratorCard from "@/components/CollaboratorCard";
@@ -14,10 +14,20 @@ const CollaboratorsSection = () => {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [allCollapsed, setAllCollapsed] = useState(false);
+  const [collapsedStates, setCollapsedStates] = useState<Record<string, boolean>>({});
   
   // For adding skills to existing collaborator
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
+
+  // Sincronizar estados de colapso com o estado geral
+  useEffect(() => {
+    const newStates: Record<string, boolean> = {};
+    collaborators.forEach(c => {
+      newStates[c.id] = allCollapsed;
+    });
+    setCollapsedStates(newStates);
+  }, [allCollapsed, collaborators]);
 
   const toggleAllCollapsed = () => {
     setAllCollapsed(!allCollapsed);
@@ -59,7 +69,7 @@ const CollaboratorsSection = () => {
             <div key={collaborator.id} className="flex flex-col gap-2">
               <CollaboratorCard 
                 collaborator={collaborator} 
-                defaultCollapsed={allCollapsed}
+                defaultCollapsed={collapsedStates[collaborator.id] || false}
               />
               <Button 
                 variant="outline" 
