@@ -42,7 +42,7 @@ export const generateCollaboratorInsights = (
         type: "Liderança",
         description: "Potencial para liderança",
         score: (leadershipSkills.length / skillEntries.length) * 5,
-        icon: <TrendingUp className="h-4 w-4 text-green-500" />,
+        icon: { type: TrendingUp, props: { className: "h-4 w-4 text-green-500" } },
         details
       });
     }
@@ -67,7 +67,7 @@ export const generateCollaboratorInsights = (
         type: "Técnico",
         description: "Especialista técnico",
         score: (technicalSkills.length / skillEntries.length) * 5,
-        icon: <BarChart className="h-4 w-4 text-blue-500" />,
+        icon: { type: BarChart, props: { className: "h-4 w-4 text-blue-500" } },
         details
       });
     }
@@ -87,7 +87,7 @@ export const generateCollaboratorInsights = (
         type: "Desenvolvimento",
         description: "Áreas para desenvolvimento",
         score: (improvementAreas.length / skillEntries.length) * 5,
-        icon: <TrendingDown className="h-4 w-4 text-amber-500" />,
+        icon: { type: TrendingDown, props: { className: "h-4 w-4 text-amber-500" } },
         details
       });
     }

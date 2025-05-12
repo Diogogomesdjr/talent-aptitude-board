@@ -1,5 +1,13 @@
 
 import { Collaborator, Skill } from "@/context/SkillContext";
+import { ElementType } from "react";
+
+export interface IconData {
+  type: ElementType;
+  props: {
+    className: string;
+  };
+}
 
 export interface TeamInsight {
   teamId: string;
@@ -17,7 +25,7 @@ export interface CollaboratorInsight {
     type: string;
     description: string;
     score: number;
-    icon: JSX.Element;
+    icon: IconData;
     details?: string[];
   }[];
 }
