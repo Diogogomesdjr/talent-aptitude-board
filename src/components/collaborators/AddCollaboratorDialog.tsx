@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useSkillContext } from "@/context/SkillContext";
-import { Upload } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 interface AddCollaboratorDialogProps {
   isOpen: boolean;
@@ -24,7 +25,12 @@ const AddCollaboratorDialog = ({ isOpen, onOpenChange }: AddCollaboratorDialogPr
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [teamId, setTeamId] = useState<string | undefined>(undefined);
   
+  // Novos estados para ajuste de imagem
+  const [scale, setScale] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -36,6 +42,9 @@ const AddCollaboratorDialog = ({ isOpen, onOpenChange }: AddCollaboratorDialogPr
       reader.onloadend = () => {
         const result = reader.result as string;
         setPhotoPreview(result);
+        // Reset adjustments for new image
+        setScale(1);
+        setRotation(0);
       };
       reader.readAsDataURL(file);
       
@@ -49,6 +58,9 @@ const AddCollaboratorDialog = ({ isOpen, onOpenChange }: AddCollaboratorDialogPr
     // Clear file selection
     setPhotoFile(null);
     setPhotoPreview(null);
+    // Reset adjustments
+    setScale(1);
+    setRotation(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -81,15 +93,29 @@ const AddCollaboratorDialog = ({ isOpen, onOpenChange }: AddCollaboratorDialogPr
     setPhotoFile(null);
     setPhotoPreview(null);
     setTeamId(undefined);
+    setScale(1);
+    setRotation(0);
     onOpenChange(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  const handleZoomIn = () => {
+    setScale(prev => Math.min(prev + 0.1, 2));
+  };
+
+  const handleZoomOut = () => {
+    setScale(prev => Math.max(prev - 0.1, 0.5));
+  };
+
+  const handleRotate = () => {
+    setRotation(prev => (prev + 90) % 360);
+  };
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Colaborador</DialogTitle>
         </DialogHeader>
@@ -131,18 +157,57 @@ const AddCollaboratorDialog = ({ isOpen, onOpenChange }: AddCollaboratorDialogPr
               </div>
               
               {(photoPreview || photoUrl) && (
-                <div className="flex justify-center">
-                  <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
-                    <img 
-                      src={photoPreview || photoUrl} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                      onError={() => toast({
-                        title: "Erro ao carregar imagem",
-                        description: "Verifique a URL fornecida",
-                        variant: "destructive"
-                      })}
+                <div className="space-y-4">
+                  {/* Controles de ajuste */}
+                  <div className="flex justify-center gap-2">
+                    <Button type="button" size="sm" variant="outline" onClick={handleZoomOut}>
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={handleZoomIn}>
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={handleRotate}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Zoom</span>
+                      <span>{Math.round(scale * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[scale * 100]}
+                      min={50}
+                      max={200}
+                      step={5}
+                      onValueChange={(value) => setScale(value[0] / 100)}
                     />
+                  </div>
+                  
+                  {/* Preview container */}
+                  <div className="flex justify-center">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
+                      <div className="relative w-full h-full">
+                        <img 
+                          ref={imageRef}
+                          src={photoPreview || photoUrl} 
+                          alt="Preview" 
+                          style={{
+                            transform: `scale(${scale}) rotate(${rotation}deg)`,
+                            transition: "transform 0.2s ease",
+                            objectFit: "cover",
+                            width: "100%",
+                            height: "100%"
+                          }}
+                          onError={() => toast({
+                            title: "Erro ao carregar imagem",
+                            description: "Verifique a URL fornecida",
+                            variant: "destructive"
+                          })}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
