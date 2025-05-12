@@ -13,6 +13,7 @@ const RecognitionCollapseButton = ({ allCollapsed, onClick }: RecognitionCollaps
       variant="outline" 
       onClick={onClick}
       className="flex items-center gap-2 w-full sm:w-auto"
+      type="button"
     >
       {allCollapsed ? 
         <><ChevronDown size={16} /> Expandir Todos</> : 

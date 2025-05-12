@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSkillContext } from "@/context/SkillContext";
 import CollaboratorCard from "@/components/CollaboratorCard";
-import { ArrowDown, ArrowUp, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import CollaboratorLegend from "./CollaboratorLegend";
 import AddCollaboratorDialog from "./AddCollaboratorDialog";
 import AddSkillsDialog from "./AddSkillsDialog";
@@ -21,13 +21,15 @@ const CollaboratorsSection = () => {
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
 
-  // Sincronizar estados de colapso com o estado geral
+  // Synchronize collapse states with the general state
   useEffect(() => {
-    const newStates: Record<string, boolean> = {};
-    collaborators.forEach(c => {
-      newStates[c.id] = allCollapsed;
-    });
-    setCollapsedStates(newStates);
+    if (collaborators.length > 0) {
+      const newStates: Record<string, boolean> = {};
+      collaborators.forEach(c => {
+        newStates[c.id] = allCollapsed;
+      });
+      setCollapsedStates(newStates);
+    }
   }, [allCollapsed, collaborators]);
 
   const toggleAllCollapsed = () => {
