@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -71,6 +71,12 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
   
   const { toast } = useToast();
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  
+  // Update isCollapsed when defaultCollapsed changes
+  useEffect(() => {
+    setIsCollapsed(defaultCollapsed);
+  }, [defaultCollapsed]);
+  
   const [addSkillDialogOpen, setAddSkillDialogOpen] = useState(false);
   const [editPhotoDialogOpen, setEditPhotoDialogOpen] = useState(false);
   
