@@ -39,6 +39,16 @@ interface SkillContextType {
   updateFunctionRole: (id: string, name: string, description?: string) => void;
   deleteFunctionRole: (id: string) => void;
   assignFunctionRole: (collaboratorId: string, functionRoleId: string) => void;
+  // Add missing methods that are used in MonthlyComparison.tsx
+  saveMonthlySnapshot: (date?: Date) => boolean;
+  getPreviousMonthData: (currentDate: Date) => any;
+  calculateCurrentMetrics: (filteredCollabs?: Collaborator[]) => {
+    skillAverage: number;
+    aptitudePercentage: number;
+    totalSkills: number;
+    totalSkillsByCategory: Record<string, number>;
+  };
+  historicalData: Record<string, any>;
 }
 
 const SkillContext = createContext<SkillContextType | undefined>(undefined);
@@ -86,6 +96,11 @@ export const SkillProvider = ({ children }: SkillProviderProps) => {
     deleteSkill,
     deleteTeam,
     deleteFunctionRole,
+    // Explicitly add methods used in MonthlyComparison.tsx
+    saveMonthlySnapshot: collaboratorsData.saveMonthlySnapshot,
+    getPreviousMonthData: collaboratorsData.getPreviousMonthData,
+    calculateCurrentMetrics: collaboratorsData.calculateCurrentMetrics,
+    historicalData: collaboratorsData.historicalData
   };
 
   return <SkillContext.Provider value={value}>{children}</SkillContext.Provider>;

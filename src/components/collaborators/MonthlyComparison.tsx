@@ -17,8 +17,11 @@ interface MonthlyComparisonProps {
 }
 
 const MonthlyComparison = ({ selectedDate, filteredCollaborators }: MonthlyComparisonProps) => {
-  const { useCollaboratorsData } = useSkillContext();
-  const { getPreviousMonthData, calculateCurrentMetrics, saveMonthlySnapshot } = useCollaboratorsData();
+  const { 
+    calculateCurrentMetrics,
+    saveMonthlySnapshot,
+    getPreviousMonthData 
+  } = useSkillContext();
   
   const [isLoading, setIsLoading] = useState(true);
   const [previousMonthData, setPreviousMonthData] = useState<any>(null);
@@ -190,7 +193,7 @@ const MonthlyComparison = ({ selectedDate, filteredCollaborators }: MonthlyCompa
                   <div className="text-3xl font-bold">
                     {currentMetrics.totalSkills}
                   </div>
-                  {previousMonthData && renderTrend(
+                  {previousMonthData && previousMonthData.totalSkills !== undefined && renderTrend(
                     calculateDiff(currentMetrics.totalSkills, previousMonthData.totalSkills).direction,
                     calculateDiff(currentMetrics.totalSkills, previousMonthData.totalSkills).value
                   )}
@@ -199,7 +202,7 @@ const MonthlyComparison = ({ selectedDate, filteredCollaborators }: MonthlyCompa
                   Comparado a {previousMonthData ? formatMonthDisplay(previousMonthData.month) : "mês anterior"}
                 </p>
                 <div className="grid grid-cols-3 gap-2 mt-3">
-                  {Object.entries(currentMetrics.totalSkillsByCategory).map(([category, count], i) => (
+                  {Object.entries(currentMetrics.totalSkillsByCategory).map(([category, count]) => (
                     <Card key={category} className="p-2">
                       <div className="text-center">
                         <div className="text-sm font-medium">
