@@ -62,8 +62,12 @@ const CollaboratorCard = ({
                 )}
                 <RecognitionStatus 
                   isEligible={isEligibleForRecognition}
-                  isHighPotential={isHighPotential}
-                  needsAttention={needsAttention}
+                  highLevelSkills={highLevelSkills}
+                  skillStats={{
+                    level5Count: levelCount.level5,
+                    level4Count: levelCount.level4,
+                    aptSkillsCount: Object.values(collaborator.skills).filter(skill => skill.isApt).length
+                  }}
                 />
               </div>
               <div className="text-sm text-gray-500">
@@ -88,13 +92,11 @@ const CollaboratorCard = ({
             <div>
               <CollaboratorProgressBar 
                 aptitudePercentage={aptitudePercentage}
-                levelCount={levelCount} 
               />
             </div>
             
             <CollaboratorSkillsList 
-              skillsWithLevels={skillsWithLevels}
-              highLevelSkills={highLevelSkills}
+              skills={skillsWithLevels}
             />
             
             {improvementSection && (

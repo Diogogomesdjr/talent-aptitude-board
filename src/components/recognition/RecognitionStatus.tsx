@@ -29,7 +29,7 @@ const RecognitionStatus = ({ isEligible, highLevelSkills, skillStats }: Recognit
       </div>
       
       {/* Highlight areas of excellence */}
-      {highLevelSkills.length > 0 && (
+      {highLevelSkills && highLevelSkills.length > 0 && (
         <div className="mb-4">
           <h5 className="font-medium mb-2">Áreas de Excelência</h5>
           <div className="flex flex-wrap gap-2">

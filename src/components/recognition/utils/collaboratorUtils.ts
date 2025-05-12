@@ -1,5 +1,5 @@
 
-import { Collaborator, Skill } from "@/context/SkillContext";
+import { Collaborator } from "@/types/skills";
 
 export const calculateAptitudePercentage = (collaborator: Collaborator) => {
   const skillsCount = Object.keys(collaborator.skills).length;

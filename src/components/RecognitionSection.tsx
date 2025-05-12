@@ -84,7 +84,7 @@ const RecognitionSection = () => {
           {filteredCollaborators.map(collaborator => {
             const aptitudePercentage = calculateAptitudePercentage(collaborator);
             const team = collaborator.teamId ? getTeam(collaborator.teamId) : undefined;
-            const levelCount = getCollaboratorLevelCount(collaborator);
+            const collabLevelCount = getCollaboratorLevelCount(collaborator);
             const isCollapsed = collapsedStates[collaborator.id] ?? false;
             const isHighPotentialCollaborator = isHighPotential(collaborator);
             
@@ -115,7 +115,14 @@ const RecognitionSection = () => {
                 needsAttention={needsAttention(collaborator)}
                 skillsWithLevels={skillsWithLevels}
                 highLevelSkills={highLevelSkills}
-                levelCount={levelCount}
+                levelCount={{
+                  level1: collabLevelCount.levels["1"] || 0,
+                  level2: collabLevelCount.levels["2"] || 0,
+                  level3: collabLevelCount.levels["3"] || 0,
+                  level4: collabLevelCount.levels["4"] || 0,
+                  level5: collabLevelCount.levels["5"] || 0,
+                  notRated: collabLevelCount.levels["N/A"] || 0
+                }}
                 improvementSection={
                   !isCollapsed && (
                     <ImprovementOpportunitiesSection 

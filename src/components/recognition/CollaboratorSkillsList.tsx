@@ -1,16 +1,13 @@
 
+import { Skill, CollaboratorSkill } from "@/types/skills";
 import SkillItem from "./SkillItem";
-import { Skill } from "@/context/SkillContext";
 
 interface CollaboratorSkillsListProps {
-  skills: Array<Skill & { 
-    rating: number | "N/A";
-    isApt: boolean;
-  }>;
+  skills: Array<Skill & CollaboratorSkill>;
 }
 
 const CollaboratorSkillsList = ({ skills }: CollaboratorSkillsListProps) => {
-  if (skills.length === 0) {
+  if (!skills || skills.length === 0) {
     return <p className="text-gray-500">Nenhuma habilidade atribuída.</p>;
   }
 
