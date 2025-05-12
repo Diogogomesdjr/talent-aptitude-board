@@ -6,6 +6,7 @@ import RecognitionRules from "./recognition/RecognitionRules";
 import RecognitionCollapseButton from "./recognition/RecognitionCollapseButton";
 import CollaboratorCard from "./recognition/CollaboratorCard";
 import NoCollaboratorsFound from "./recognition/NoCollaboratorsFound";
+import ImprovementOpportunitiesSection from "./recognition/ImprovementOpportunitiesSection";
 import { 
   calculateAptitudePercentage,
   getCollaboratorLevelCount,
@@ -115,6 +116,14 @@ const RecognitionSection = () => {
                 skillsWithLevels={skillsWithLevels}
                 highLevelSkills={highLevelSkills}
                 levelCount={levelCount}
+                improvementSection={
+                  !isCollapsed && (
+                    <ImprovementOpportunitiesSection 
+                      collaboratorId={collaborator.id}
+                      initialValues={collaborator.improvementOpportunities}
+                    />
+                  )
+                }
               />
             );
           })}

@@ -3,9 +3,26 @@ import { Collaborator, CollaboratorSkill } from "@/types/skills";
 import { generateId } from "@/utils/skillUtils";
 import { format } from "date-fns";
 
+// Tipo para versão simplificada do colaborador para armazenamento
+interface SimpleCollaborator {
+  id: string;
+  name: string;
+  photoUrl: string;
+  isPontoCentral: boolean;
+  isAptForRole: boolean;
+  teamId?: string;
+  functionRoleId?: string;
+  skills: Record<string, CollaboratorSkill>;
+  improvementOpportunities?: {
+    hardSkills?: string;
+    softSkills?: string;
+    nextChallenges?: string;
+  };
+}
+
 // Tipo para armazenar dados históricos por mês
 interface MonthlyData {
-  collaborators: Collaborator[];
+  collaborators: SimpleCollaborator[];
   metrics: {
     skillAverage: number;
     aptitudePercentage: number;
@@ -64,7 +81,8 @@ export const useCollaboratorsData = () => {
         isAptForRole: c.isAptForRole,
         teamId: c.teamId,
         functionRoleId: c.functionRoleId,
-        skills: c.skills
+        skills: c.skills,
+        improvementOpportunities: c.improvementOpportunities
       }));
       
       safeLocalStorageSet("collaborators", essentialData);
@@ -149,14 +167,22 @@ export const useCollaboratorsData = () => {
     try {
       // Create a simplified version of collaborators for storage
       // to reduce localStorage size
-      const simplifiedCollabs = collaborators.map(c => ({
+      const simplifiedCollabs: SimpleCollaborator[] = collaborators.map(c => ({
         id: c.id,
         name: c.name,
-        skills: c.skills,
+        photoUrl: c.photoUrl,
+        isPontoCentral: c.isPontoCentral,
+        isAptForRole: c.isAptForRole,
         teamId: c.teamId,
         functionRoleId: c.functionRoleId,
-        isAptForRole: c.isAptForRole
+        skills: c.skills
       }));
+      
+      // Create the new monthly data entry
+      const newMonthlyData: MonthlyData = {
+        collaborators: simplifiedCollabs,
+        metrics
+      };
       
       setHistoricalData(prev => {
         // Remove oldest month if we're exceeding our limit
@@ -171,10 +197,7 @@ export const useCollaboratorsData = () => {
         // Add new month
         return {
           ...updatedData,
-          [monthKey]: {
-            collaborators: simplifiedCollabs,
-            metrics
-          }
+          [monthKey]: newMonthlyData
         };
       });
       
@@ -328,6 +351,28 @@ export const useCollaboratorsData = () => {
     ));
   };
 
+  // Atualiza oportunidades de melhoria para um colaborador
+  const updateImprovementOpportunities = (
+    collaboratorId: string, 
+    opportunities: {
+      hardSkills?: string;
+      softSkills?: string;
+      nextChallenges?: string;
+    }
+  ) => {
+    setCollaborators(collaborators.map(collaborator => 
+      collaborator.id === collaboratorId 
+        ? { 
+            ...collaborator, 
+            improvementOpportunities: {
+              ...collaborator.improvementOpportunities,
+              ...opportunities
+            }
+          } 
+        : collaborator
+    ));
+  };
+
   return {
     collaborators,
     addCollaborator,
@@ -342,6 +387,7 @@ export const useCollaboratorsData = () => {
     handleTeamDeleted,
     handleSkillDeleted,
     handleFunctionRoleDeleted,
+    updateImprovementOpportunities,
     // Novos métodos
     saveMonthlySnapshot,
     getPreviousMonthData,

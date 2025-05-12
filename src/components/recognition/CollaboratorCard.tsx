@@ -1,41 +1,34 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
+import { Collaborator, Skill, Team, CollaboratorSkill } from "@/types/skills";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
-import { Flag, ChevronUp, ChevronDown, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { Collaborator, Skill } from "@/context/SkillContext";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import RecognitionStatus from "./RecognitionStatus";
 import CollaboratorProgressBar from "./CollaboratorProgressBar";
 import CollaboratorSkillsList from "./CollaboratorSkillsList";
-import RecognitionStatus from "./RecognitionStatus";
 
 interface CollaboratorCardProps {
   collaborator: Collaborator;
   isCollapsed: boolean;
   toggleCollapsed: (id: string) => void;
-  team?: { name: string };
+  team?: Team;
   aptitudePercentage: number;
   isEligibleForRecognition: boolean;
   isHighPotential: boolean;
   needsAttention: boolean;
-  skillsWithLevels: Array<Skill & { 
-    rating: number | "N/A";
-    isApt: boolean;
-  }>;
-  highLevelSkills: Array<Skill & { 
-    rating: number | "N/A";
-    isApt: boolean;
-  }>;
+  skillsWithLevels: (Skill & CollaboratorSkill)[];
+  highLevelSkills: (Skill & CollaboratorSkill)[];
   levelCount: {
-    total: number;
-    levels: Record<string, number>;
+    level1: number;
+    level2: number;
+    level3: number;
+    level4: number;
+    level5: number;
+    notRated: number;
   };
+  improvementSection?: React.ReactNode;
 }
 
 const CollaboratorCard = ({
@@ -49,108 +42,70 @@ const CollaboratorCard = ({
   needsAttention,
   skillsWithLevels,
   highLevelSkills,
-  levelCount
+  levelCount,
+  improvementSection
 }: CollaboratorCardProps) => {
-  // Memorize o estado de expansão para evitar recolhimento após cada ação
-  const [userExpandedState, setUserExpandedState] = useState<boolean | null>(null);
-
-  // Função para alternar o estado de expansão
-  const handleToggleCollapsed = () => {
-    // Armazene a escolha do usuário
-    setUserExpandedState(!isCollapsed);
-    // Chame a função toggleCollapsed do componente pai
-    toggleCollapsed(collaborator.id);
-  };
-
-  // Determine se devemos mostrar o conteúdo expandido com base na preferência do usuário
-  // Se o usuário tiver expandido explicitamente (userExpandedState === true), mostramos expandido
-  // Se o usuário tiver recolhido explicitamente (userExpandedState === false), mostramos recolhido
-  // Caso contrário, seguimos o estado isCollapsed recebido por prop
-  const shouldShowExpanded = userExpandedState !== null ? userExpandedState : !isCollapsed;
-
   return (
-    <Card 
-      className={`${
-        needsAttention ? "border-red-200" : 
-        isHighPotential ? "border-yellow-200" : 
-        isEligibleForRecognition ? "border-green-200" : ""
-      }`}
-    >
-      <CardContent className="p-0">
-        <div className="flex justify-between items-center p-4 bg-gray-50 border-b">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border">
-              <AvatarImage src={collaborator.photoUrl} alt={collaborator.name} />
-              <AvatarFallback>{collaborator.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={collaborator.photoUrl} />
+              <AvatarFallback>{collaborator.name.substring(0, 2)}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold">{collaborator.name}</h3>
+              <div className="flex items-center space-x-2">
+                <h3 className="font-medium">{collaborator.name}</h3>
                 {collaborator.isPontoCentral && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Flag className="h-4 w-4 text-blue-500" aria-label="Ponto Focal" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Ponto Focal</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">Ponto Central</Badge>
                 )}
-                {isHighPotential && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Star className="h-4 w-4 text-yellow-500" aria-label="Alto Potencial" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Alto Potencial</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                <RecognitionStatus 
+                  isEligible={isEligibleForRecognition}
+                  isHighPotential={isHighPotential}
+                  needsAttention={needsAttention}
+                />
               </div>
-              {team && <p className="text-sm text-gray-500">Equipe: {team.name}</p>}
+              <div className="text-sm text-gray-500">
+                {team?.name || "Sem time"} • {aptitudePercentage.toFixed(0)}% de aptidão
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <CollaboratorProgressBar aptitudePercentage={aptitudePercentage} />
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-500" 
-              onClick={handleToggleCollapsed}
-            >
-              {!shouldShowExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-            </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => toggleCollapsed(collaborator.id)}
+          >
+            {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+      
+      {!isCollapsed && (
+        <div className="p-4 border-t">
+          <div className="space-y-4">
+            <div>
+              <CollaboratorProgressBar 
+                aptitudePercentage={aptitudePercentage}
+                levelCount={levelCount} 
+              />
+            </div>
+            
+            <CollaboratorSkillsList 
+              skillsWithLevels={skillsWithLevels}
+              highLevelSkills={highLevelSkills}
+            />
+            
+            {improvementSection && (
+              <div className="mt-4">
+                {improvementSection}
+              </div>
+            )}
           </div>
         </div>
-        
-        {shouldShowExpanded && (
-          <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3">Níveis de Habilidade</h4>
-                <div className="space-y-2">
-                  <CollaboratorSkillsList skills={skillsWithLevels} />
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-3">Status de Reconhecimento</h4>
-                <RecognitionStatus 
-                  isEligible={isEligibleForRecognition} 
-                  highLevelSkills={highLevelSkills}
-                  skillStats={{
-                    level5Count: levelCount.levels["5"] || 0,
-                    level4Count: levelCount.levels["4"] || 0,
-                    aptSkillsCount: Object.values(collaborator.skills).filter(s => s.isApt).length
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
 

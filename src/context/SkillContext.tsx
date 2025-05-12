@@ -1,45 +1,53 @@
-
-import { createContext, useContext, ReactNode } from "react";
-import { 
-  SkillCategory, 
-  Skill, 
-  CollaboratorSkill, 
-  FunctionRole, 
-  Collaborator, 
-  Team 
-} from "@/types/skills";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Skill, Collaborator, Team, SkillCategory, CollaboratorSkill, FunctionRole } from "@/types/skills";
 import { useSkillsData } from "@/hooks/useSkillsData";
 import { useCollaboratorsData } from "@/hooks/useCollaboratorsData";
 import { useTeamsData } from "@/hooks/useTeamsData";
 import { useFunctionRolesData } from "@/hooks/useFunctionRolesData";
 
 interface SkillContextType {
+  // Skills methods
   skills: Skill[];
-  collaborators: Collaborator[];
-  teams: Team[];
-  functionRoles: FunctionRole[];
   addSkill: (name: string, category: SkillCategory) => void;
-  updateSkill: (id: string, name: string, category: SkillCategory) => void;
+  updateSkill: (id: string, data: Partial<Skill>) => void;
   deleteSkill: (id: string) => void;
+  getSkill: (id: string) => Skill | undefined;
+
+  // Teams methods
+  teams: Team[];
+  addTeam: (name: string) => void;
+  updateTeam: (id: string, data: Partial<Team>) => void;
+  deleteTeam: (id: string) => void;
+  getTeam: (id: string) => Team | undefined;
+
+  // Function Role methods
+  functionRoles: FunctionRole[];
+  addFunctionRole: (name: string, description?: string) => void;
+  updateFunctionRole: (id: string, data: Partial<FunctionRole>) => void;
+  deleteFunctionRole: (id: string) => void;
+  getFunctionRole: (id: string) => FunctionRole | undefined;
+  
+  // Collaborators methods
+  collaborators: Collaborator[];
   addCollaborator: (name: string, photoUrl: string, teamId?: string) => void;
   updateCollaborator: (id: string, data: Partial<Omit<Collaborator, "id" | "skills">>) => void;
   deleteCollaborator: (id: string) => void;
   addCollaboratorSkill: (collaboratorId: string, skillId: string) => void;
   updateCollaboratorSkill: (collaboratorId: string, skillId: string, data: Partial<CollaboratorSkill>) => void;
   removeCollaboratorSkill: (collaboratorId: string, skillId: string) => void;
-  addTeam: (name: string) => void;
-  updateTeam: (id: string, name: string) => void;
-  deleteTeam: (id: string) => void;
   togglePontoCentral: (id: string) => void;
   toggleCollaboratorAptForRole: (id: string) => void;
-  getSkill: (id: string) => Skill | undefined;
-  getTeam: (id: string) => Team | undefined;
-  getFunctionRole: (id: string) => FunctionRole | undefined;
-  addFunctionRole: (name: string, description?: string) => void;
-  updateFunctionRole: (id: string, name: string, description?: string) => void;
-  deleteFunctionRole: (id: string) => void;
   assignFunctionRole: (collaboratorId: string, functionRoleId: string) => void;
-  // Add missing methods that are used in MonthlyComparison.tsx
+  updateImprovementOpportunities: (
+    collaboratorId: string, 
+    opportunities: {
+      hardSkills?: string;
+      softSkills?: string;
+      nextChallenges?: string;
+    }
+  ) => void;
+  
+  // Historical methods
   saveMonthlySnapshot: (date?: Date) => boolean;
   getPreviousMonthData: (currentDate: Date) => any;
   calculateCurrentMetrics: (filteredCollabs?: Collaborator[]) => {
@@ -61,50 +69,108 @@ export const useSkillContext = () => {
   return context;
 };
 
-interface SkillProviderProps {
-  children: ReactNode;
-}
-
-export const SkillProvider = ({ children }: SkillProviderProps) => {
-  const skillsData = useSkillsData();
-  const collaboratorsData = useCollaboratorsData();
-  const teamsData = useTeamsData();
-  const functionRolesData = useFunctionRolesData();
-
-  // Wire up the hooks to handle dependencies between entities
-  const deleteSkill = (id: string) => {
-    skillsData.deleteSkill(id);
-    collaboratorsData.handleSkillDeleted(id);
-  };
-
-  const deleteTeam = (id: string) => {
-    teamsData.deleteTeam(id);
-    collaboratorsData.handleTeamDeleted(id);
-  };
-
-  const deleteFunctionRole = (id: string) => {
-    functionRolesData.deleteFunctionRole(id);
-    collaboratorsData.handleFunctionRoleDeleted(id);
-  };
-
-  const value = {
-    ...skillsData,
-    ...collaboratorsData,
-    ...teamsData,
-    ...functionRolesData,
-    // Override methods that need to handle dependencies
+export const SkillProvider = ({ children }: { children: React.ReactNode }) => {
+  const {
+    skills,
+    addSkill,
+    updateSkill,
     deleteSkill,
+    getSkill
+  } = useSkillsData();
+
+  const {
+    teams,
+    addTeam,
+    updateTeam,
     deleteTeam,
+    getTeam
+  } = useTeamsData();
+
+  const {
+    functionRoles,
+    addFunctionRole,
+    updateFunctionRole,
     deleteFunctionRole,
-    // Explicitly add methods used in MonthlyComparison.tsx
-    saveMonthlySnapshot: collaboratorsData.saveMonthlySnapshot,
-    getPreviousMonthData: collaboratorsData.getPreviousMonthData,
-    calculateCurrentMetrics: collaboratorsData.calculateCurrentMetrics,
-    historicalData: collaboratorsData.historicalData
-  };
+    getFunctionRole
+  } = useFunctionRolesData();
+  
+  const {
+    collaborators,
+    addCollaborator,
+    updateCollaborator,
+    deleteCollaborator,
+    addCollaboratorSkill,
+    updateCollaboratorSkill,
+    removeCollaboratorSkill,
+    togglePontoCentral,
+    toggleCollaboratorAptForRole,
+    assignFunctionRole,
+    saveMonthlySnapshot,
+    getPreviousMonthData,
+    calculateCurrentMetrics,
+    historicalData,
+    handleTeamDeleted,
+    handleSkillDeleted,
+    handleFunctionRoleDeleted,
+    updateImprovementOpportunities
+  } = useCollaboratorsData();
+  
+  useEffect(() => {
+    // Update collaborators when a team is deleted
+    handleTeamDeleted;
+    
+    // Update collaborators when a skill is deleted
+    handleSkillDeleted;
 
-  return <SkillContext.Provider value={value}>{children}</SkillContext.Provider>;
+    // Update collaborators when a function role is deleted
+    handleFunctionRoleDeleted;
+  }, [handleTeamDeleted, handleSkillDeleted, handleFunctionRoleDeleted]);
+  
+  return (
+    <SkillContext.Provider
+      value={{
+        // Skills
+        skills,
+        addSkill,
+        updateSkill,
+        deleteSkill,
+        getSkill,
+
+        // Teams
+        teams,
+        addTeam,
+        updateTeam,
+        deleteTeam,
+        getTeam,
+
+        // Function Roles
+        functionRoles,
+        addFunctionRole,
+        updateFunctionRole,
+        deleteFunctionRole,
+        getFunctionRole,
+        
+        // Collaborators
+        collaborators,
+        addCollaborator,
+        updateCollaborator,
+        deleteCollaborator,
+        addCollaboratorSkill,
+        updateCollaboratorSkill,
+        removeCollaboratorSkill,
+        togglePontoCentral,
+        toggleCollaboratorAptForRole,
+        assignFunctionRole,
+        updateImprovementOpportunities,
+        
+        // Historical data
+        saveMonthlySnapshot,
+        getPreviousMonthData,
+        calculateCurrentMetrics,
+        historicalData
+      }}
+    >
+      {children}
+    </SkillContext.Provider>
+  );
 };
-
-// Re-export types
-export type { SkillCategory, Skill, CollaboratorSkill, FunctionRole, Collaborator, Team };
