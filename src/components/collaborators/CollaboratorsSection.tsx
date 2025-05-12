@@ -11,7 +11,7 @@ import EmptyCollaboratorsList from "./EmptyCollaboratorsList";
 import RecognitionCollapseButton from "../recognition/RecognitionCollapseButton";
 import CollaboratorsFilters from "./CollaboratorsFilters";
 import MonthlyComparison from "./MonthlyComparison";
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 const CollaboratorsSection = () => {
   const { collaborators, teams, functionRoles } = useSkillContext();
@@ -97,40 +97,43 @@ const CollaboratorsSection = () => {
       />
       
       <div className="mt-6">
-        <TabsContent value="current">
-          <CollaboratorLegend />
+        {/* Important: Wrap TabsContent components inside a Tabs component */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsContent value="current">
+            <CollaboratorLegend />
+            
+            {filteredCollaborators.length === 0 ? (
+              <EmptyCollaboratorsList onAddClick={() => setIsDialogOpen(true)} />
+            ) : (
+              <div className="grid grid-cols-1 gap-6 mt-4">
+                {filteredCollaborators.map((collaborator) => (
+                  <div key={collaborator.id} className="flex flex-col gap-2">
+                    <CollaboratorCard 
+                      collaborator={collaborator} 
+                      defaultCollapsed={collapsedStates[collaborator.id] || false}
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="self-end"
+                      onClick={() => openAddSkillDialog(collaborator.id)}
+                    >
+                      <Plus size={16} className="mr-2" />
+                      Adicionar Habilidades
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
           
-          {filteredCollaborators.length === 0 ? (
-            <EmptyCollaboratorsList onAddClick={() => setIsDialogOpen(true)} />
-          ) : (
-            <div className="grid grid-cols-1 gap-6 mt-4">
-              {filteredCollaborators.map((collaborator) => (
-                <div key={collaborator.id} className="flex flex-col gap-2">
-                  <CollaboratorCard 
-                    collaborator={collaborator} 
-                    defaultCollapsed={collapsedStates[collaborator.id] || false}
-                  />
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="self-end"
-                    onClick={() => openAddSkillDialog(collaborator.id)}
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Adicionar Habilidades
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="comparison">
-          <MonthlyComparison 
-            selectedDate={selectedDate}
-            filteredCollaborators={filteredCollaborators} 
-          />
-        </TabsContent>
+          <TabsContent value="comparison">
+            <MonthlyComparison 
+              selectedDate={selectedDate}
+              filteredCollaborators={filteredCollaborators} 
+            />
+          </TabsContent>
+        </Tabs>
       </div>
       
       <AddCollaboratorDialog 
