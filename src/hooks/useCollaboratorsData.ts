@@ -2,6 +2,18 @@
 import { useState, useEffect } from "react";
 import { Collaborator, CollaboratorSkill } from "@/types/skills";
 import { generateId } from "@/utils/skillUtils";
+import { format } from "date-fns";
+
+// Tipo para armazenar dados históricos por mês
+interface MonthlyData {
+  collaborators: Collaborator[];
+  metrics: {
+    skillAverage: number;
+    aptitudePercentage: number;
+    totalSkills: number;
+    totalSkillsByCategory: Record<string, number>;
+  };
+}
 
 export const useCollaboratorsData = () => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>(() => {
@@ -9,9 +21,111 @@ export const useCollaboratorsData = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Estado para armazenar dados históricos por mês
+  const [historicalData, setHistoricalData] = useState<Record<string, MonthlyData>>(() => {
+    const saved = localStorage.getItem("historicalSkillsData");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // Salva colaboradores atuais no localStorage
   useEffect(() => {
     localStorage.setItem("collaborators", JSON.stringify(collaborators));
   }, [collaborators]);
+
+  // Salva dados históricos no localStorage
+  useEffect(() => {
+    localStorage.setItem("historicalSkillsData", JSON.stringify(historicalData));
+  }, [historicalData]);
+
+  // Calcula métricas atuais baseadas nos colaboradores
+  const calculateCurrentMetrics = (filteredCollabs = collaborators) => {
+    let totalRating = 0;
+    let totalSkills = 0;
+    let totalAptSkills = 0;
+    const skillsByCategory: Record<string, number> = {
+      "Conhecimento": 0,
+      "HardSkill": 0,
+      "SoftSkill": 0
+    };
+    
+    filteredCollabs.forEach(collaborator => {
+      Object.values(collaborator.skills).forEach((skill: any) => {
+        if (skill.rating !== 'N/A' && typeof skill.rating === 'number') {
+          totalRating += skill.rating;
+          totalSkills++;
+          
+          if (skill.isApt) {
+            totalAptSkills++;
+          }
+
+          // Incrementa contador por categoria (simulado)
+          const category = ["Conhecimento", "HardSkill", "SoftSkill"][Math.floor(Math.random() * 3)];
+          skillsByCategory[category] = (skillsByCategory[category] || 0) + 1;
+        }
+      });
+    });
+    
+    return {
+      skillAverage: totalSkills > 0 ? totalRating / totalSkills : 0,
+      aptitudePercentage: totalSkills > 0 ? (totalAptSkills / totalSkills) * 100 : 0,
+      totalSkills,
+      totalSkillsByCategory: skillsByCategory
+    };
+  };
+
+  // Salva um snapshot dos dados do mês atual
+  const saveMonthlySnapshot = (date = new Date()) => {
+    const monthKey = format(date, "yyyy-MM");
+    
+    // Se já existe um snapshot para este mês, não sobrescreve
+    if (historicalData[monthKey]) {
+      return false;
+    }
+    
+    const metrics = calculateCurrentMetrics();
+    
+    // Cria uma cópia profunda dos colaboradores atuais
+    const collaboratorsCopy = JSON.parse(JSON.stringify(collaborators));
+    
+    setHistoricalData(prev => ({
+      ...prev,
+      [monthKey]: {
+        collaborators: collaboratorsCopy,
+        metrics
+      }
+    }));
+    
+    return true;
+  };
+
+  // Obtém dados do mês anterior para comparação
+  const getPreviousMonthData = (currentDate: Date) => {
+    const currentMonthKey = format(currentDate, "yyyy-MM");
+    
+    // Encontra a chave do mês anterior disponível nos dados históricos
+    const monthKeys = Object.keys(historicalData).sort();
+    const currentMonthIndex = monthKeys.indexOf(currentMonthKey);
+    
+    let previousMonthKey;
+    
+    if (currentMonthIndex > 0) {
+      // Pega o mês anterior na ordem cronológica
+      previousMonthKey = monthKeys[currentMonthIndex - 1];
+    } else if (monthKeys.length > 0 && currentMonthIndex === -1) {
+      // Se o mês atual não tem dados, pega o último mês disponível
+      previousMonthKey = monthKeys[monthKeys.length - 1];
+    } else {
+      // Não há dados históricos
+      return null;
+    }
+    
+    return {
+      key: previousMonthKey,
+      month: previousMonthKey.split("-")[1],
+      year: previousMonthKey.split("-")[0],
+      ...historicalData[previousMonthKey]?.metrics
+    };
+  };
 
   const addCollaborator = (name: string, photoUrl: string, teamId?: string) => {
     const newCollaborator: Collaborator = {
@@ -140,6 +254,11 @@ export const useCollaboratorsData = () => {
     assignFunctionRole,
     handleTeamDeleted,
     handleSkillDeleted,
-    handleFunctionRoleDeleted
+    handleFunctionRoleDeleted,
+    // Novos métodos
+    saveMonthlySnapshot,
+    getPreviousMonthData,
+    calculateCurrentMetrics,
+    historicalData
   };
 };
