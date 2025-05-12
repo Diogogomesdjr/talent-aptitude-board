@@ -1,10 +1,11 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: "/talent-aptitude-board/", // ✅ Adicione esta linha (substitua pelo nome do seu repositório)
+  base: "/talent-aptitude-board/", // ✅ Mesmo nome do repositório!
   server: {
     host: "::",
     port: 8080,

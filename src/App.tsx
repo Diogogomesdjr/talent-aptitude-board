@@ -29,7 +29,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/talent-aptitude-board">
           <Routes>
             <Route 
               path="/" 
