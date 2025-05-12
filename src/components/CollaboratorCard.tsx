@@ -52,9 +52,16 @@ import EditPhotoDialog from "./collaborators/EditPhotoDialog";
 interface CollaboratorCardProps {
   collaborator: CollaboratorType;
   defaultCollapsed?: boolean;
+  isCollapsed?: boolean;
+  toggleCollapsed?: () => void;
 }
 
-const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: CollaboratorCardProps) => {
+const CollaboratorCard = ({ 
+  collaborator, 
+  defaultCollapsed = false,
+  isCollapsed: controlledIsCollapsed, 
+  toggleCollapsed: controlledToggleCollapsed 
+}: CollaboratorCardProps) => {
   const { 
     skills, 
     getTeam, 
@@ -70,12 +77,18 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
   } = useSkillContext();
   
   const { toast } = useToast();
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [isCollapsedInternal, setIsCollapsedInternal] = useState(defaultCollapsed);
   
-  // Update isCollapsed when defaultCollapsed changes
+  // Use controlled or uncontrolled collapse state
+  const isCollapsed = controlledIsCollapsed !== undefined ? controlledIsCollapsed : isCollapsedInternal;
+  const toggleCollapsedHandler = controlledToggleCollapsed || (() => setIsCollapsedInternal(!isCollapsedInternal));
+  
+  // Update internal isCollapsed when defaultCollapsed changes
   useEffect(() => {
-    setIsCollapsed(defaultCollapsed);
-  }, [defaultCollapsed]);
+    if (controlledIsCollapsed === undefined) {
+      setIsCollapsedInternal(defaultCollapsed);
+    }
+  }, [defaultCollapsed, controlledIsCollapsed]);
   
   const [addSkillDialogOpen, setAddSkillDialogOpen] = useState(false);
   const [editPhotoDialogOpen, setEditPhotoDialogOpen] = useState(false);
@@ -181,7 +194,7 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
                 variant="ghost" 
                 size="sm" 
                 className="text-gray-500" 
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={toggleCollapsedHandler}
               >
                 {isCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
               </Button>
@@ -458,6 +471,13 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
           )}
         </CardContent>
       </Card>
+      
+      <EditPhotoDialog
+        isOpen={editPhotoDialogOpen}
+        onOpenChange={setEditPhotoDialogOpen}
+        collaboratorId={collaborator.id}
+        currentPhotoUrl={collaborator.photoUrl}
+      />
     </TooltipProvider>
   );
 };

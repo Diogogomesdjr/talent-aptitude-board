@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useSkillContext } from "@/context/SkillContext";
-import { Upload, ZoomIn, ZoomOut, RotateCcw, MoveLeft, MoveRight } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, RotateCcw, MoveLeft, MoveRight, MoveUp, MoveDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 interface EditPhotoDialogProps {
@@ -27,7 +27,8 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
   // Estados para ajuste de imagem
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [positionX, setPositionX] = useState(0); // Novo estado para posição horizontal
+  const [positionX, setPositionX] = useState(0);
+  const [positionY, setPositionY] = useState(0); // Novo estado para posição vertical
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -45,7 +46,8 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
         // Reset adjustments for new image
         setScale(1);
         setRotation(0);
-        setPositionX(0); // Resetar posição horizontal
+        setPositionX(0);
+        setPositionY(0); // Resetar posição vertical
       };
       reader.readAsDataURL(file);
       
@@ -62,7 +64,8 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
     // Reset adjustments
     setScale(1);
     setRotation(0);
-    setPositionX(0); // Resetar posição horizontal
+    setPositionX(0);
+    setPositionY(0); // Resetar posição vertical
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -100,6 +103,15 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
   
   const handleMoveRight = () => {
     setPositionX(prev => Math.min(prev + 10, 100));
+  };
+
+  // Funções para mover a imagem verticalmente
+  const handleMoveUp = () => {
+    setPositionY(prev => Math.max(prev - 10, -100));
+  };
+  
+  const handleMoveDown = () => {
+    setPositionY(prev => Math.min(prev + 10, 100));
   };
   
   return (
@@ -154,7 +166,7 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
               {(photoPreview || photoUrl) && (
                 <div className="space-y-4">
                   {/* Controles de ajuste */}
-                  <div className="flex justify-center gap-2">
+                  <div className="flex flex-wrap justify-center gap-2">
                     <Button type="button" size="sm" variant="outline" onClick={handleZoomOut}>
                       <ZoomOut className="h-4 w-4" />
                     </Button>
@@ -169,6 +181,12 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
                     </Button>
                     <Button type="button" size="sm" variant="outline" onClick={handleMoveRight}>
                       <MoveRight className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={handleMoveUp}>
+                      <MoveUp className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={handleMoveDown}>
+                      <MoveDown className="h-4 w-4" />
                     </Button>
                   </div>
                   
@@ -199,6 +217,20 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
                       onValueChange={(value) => setPositionX(value[0] - 100)}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Posição Vertical</span>
+                      <span>{positionY}px</span>
+                    </div>
+                    <Slider
+                      value={[positionY + 100]}
+                      min={0}
+                      max={200}
+                      step={5}
+                      onValueChange={(value) => setPositionY(value[0] - 100)}
+                    />
+                  </div>
                   
                   {/* Preview container */}
                   <div className="flex justify-center">
@@ -209,7 +241,7 @@ const EditPhotoDialog = ({ isOpen, onOpenChange, collaboratorId, currentPhotoUrl
                           src={photoPreview || photoUrl} 
                           alt="Preview" 
                           style={{
-                            transform: `translateX(${positionX}px) scale(${scale}) rotate(${rotation}deg)`,
+                            transform: `translateX(${positionX}px) translateY(${positionY}px) scale(${scale}) rotate(${rotation}deg)`,
                             transition: "transform 0.2s ease",
                             objectFit: "cover",
                             width: "100%",

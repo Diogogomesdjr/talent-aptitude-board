@@ -17,7 +17,7 @@ const CollaboratorsSection = () => {
   const { collaborators, teams, functionRoles } = useSkillContext();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [allCollapsed, setAllCollapsed] = useState(false);
+  const [allCollapsed, setAllCollapsed] = useState(true); // Inicialmente todos estão recolhidos
   const [collapsedStates, setCollapsedStates] = useState<Record<string, boolean>>({});
   
   // Filtros
@@ -33,6 +33,17 @@ const CollaboratorsSection = () => {
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
 
+  // Inicializa os estados de collapse para todos os colaboradores como true (recolhidos)
+  useEffect(() => {
+    if (collaborators.length > 0) {
+      const newStates: Record<string, boolean> = {};
+      collaborators.forEach(c => {
+        newStates[c.id] = true; // Inicialmente todos estão recolhidos
+      });
+      setCollapsedStates(newStates);
+    }
+  }, [collaborators]);
+
   // Sincroniza os estados de collapse com o estado geral
   useEffect(() => {
     if (collaborators.length > 0) {
@@ -46,6 +57,13 @@ const CollaboratorsSection = () => {
 
   const toggleAllCollapsed = () => {
     setAllCollapsed(!allCollapsed);
+  };
+
+  const toggleCollapsed = (id: string) => {
+    setCollapsedStates(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   const openAddSkillDialog = (collaboratorId: string) => {
@@ -110,7 +128,9 @@ const CollaboratorsSection = () => {
                   <div key={collaborator.id} className="flex flex-col gap-2">
                     <CollaboratorCard 
                       collaborator={collaborator} 
-                      defaultCollapsed={collapsedStates[collaborator.id] || false}
+                      defaultCollapsed={collapsedStates[collaborator.id] || true}
+                      isCollapsed={collapsedStates[collaborator.id] || false}
+                      toggleCollapsed={() => toggleCollapsed(collaborator.id)}
                     />
                     <Button 
                       variant="outline" 
