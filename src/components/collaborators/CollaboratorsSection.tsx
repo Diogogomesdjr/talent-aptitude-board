@@ -19,6 +19,7 @@ const CollaboratorsSection = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [allCollapsed, setAllCollapsed] = useState(true); // Inicialmente todos estão recolhidos
   const [collapsedStates, setCollapsedStates] = useState<Record<string, boolean>>({});
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,32 +35,33 @@ const CollaboratorsSection = () => {
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
 
   // Inicializa os estados de collapse para todos os colaboradores como true (recolhidos)
+  // apenas na primeira renderização ou quando navigando para esta seção
   useEffect(() => {
-    if (collaborators.length > 0) {
+    if (!hasUserInteracted && collaborators.length > 0) {
       const newStates: Record<string, boolean> = {};
       collaborators.forEach(c => {
         newStates[c.id] = true; // Inicialmente todos estão recolhidos
       });
       setCollapsedStates(newStates);
     }
-  }, [collaborators]);
+  }, [collaborators, hasUserInteracted]);
 
   // Sincroniza os estados de collapse com o estado geral
-  useEffect(() => {
-    if (collaborators.length > 0) {
-      const newStates: Record<string, boolean> = {};
-      collaborators.forEach(c => {
-        newStates[c.id] = allCollapsed;
-      });
-      setCollapsedStates(newStates);
-    }
-  }, [allCollapsed, collaborators]);
-
+  // apenas quando o botão de colapsar todos for clicado
   const toggleAllCollapsed = () => {
-    setAllCollapsed(!allCollapsed);
+    setHasUserInteracted(true);
+    const newAllCollapsed = !allCollapsed;
+    setAllCollapsed(newAllCollapsed);
+    
+    const newStates: Record<string, boolean> = {};
+    collaborators.forEach(c => {
+      newStates[c.id] = newAllCollapsed;
+    });
+    setCollapsedStates(newStates);
   };
 
   const toggleCollapsed = (id: string) => {
+    setHasUserInteracted(true);
     setCollapsedStates(prev => ({
       ...prev,
       [id]: !prev[id]
@@ -115,7 +117,6 @@ const CollaboratorsSection = () => {
       />
       
       <div className="mt-6">
-        {/* Important: Wrap TabsContent components inside a Tabs component */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="current">
             <CollaboratorLegend />

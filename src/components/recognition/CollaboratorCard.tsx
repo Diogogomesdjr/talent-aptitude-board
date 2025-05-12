@@ -51,6 +51,23 @@ const CollaboratorCard = ({
   highLevelSkills,
   levelCount
 }: CollaboratorCardProps) => {
+  // Memorize o estado de expansão para evitar recolhimento após cada ação
+  const [userExpandedState, setUserExpandedState] = useState<boolean | null>(null);
+
+  // Função para alternar o estado de expansão
+  const handleToggleCollapsed = () => {
+    // Armazene a escolha do usuário
+    setUserExpandedState(!isCollapsed);
+    // Chame a função toggleCollapsed do componente pai
+    toggleCollapsed(collaborator.id);
+  };
+
+  // Determine se devemos mostrar o conteúdo expandido com base na preferência do usuário
+  // Se o usuário tiver expandido explicitamente (userExpandedState === true), mostramos expandido
+  // Se o usuário tiver recolhido explicitamente (userExpandedState === false), mostramos recolhido
+  // Caso contrário, seguimos o estado isCollapsed recebido por prop
+  const shouldShowExpanded = userExpandedState !== null ? userExpandedState : !isCollapsed;
+
   return (
     <Card 
       className={`${
@@ -100,14 +117,14 @@ const CollaboratorCard = ({
               variant="ghost" 
               size="sm" 
               className="text-gray-500" 
-              onClick={() => toggleCollapsed(collaborator.id)}
+              onClick={handleToggleCollapsed}
             >
-              {isCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+              {!shouldShowExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
             </Button>
           </div>
         </div>
         
-        {!isCollapsed && (
+        {shouldShowExpanded && (
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

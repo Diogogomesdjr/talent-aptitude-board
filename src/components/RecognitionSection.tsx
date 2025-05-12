@@ -1,7 +1,6 @@
 
 import { useSkillContext } from "@/context/SkillContext";
 import { useState, useEffect } from "react";
-import { AlertTriangle } from "lucide-react";
 import RecognitionFilters from "./recognition/RecognitionFilters";
 import RecognitionRules from "./recognition/RecognitionRules";
 import RecognitionCollapseButton from "./recognition/RecognitionCollapseButton";
@@ -20,19 +19,23 @@ const RecognitionSection = () => {
   const [filter, setFilter] = useState<string>("all");
   const [allCollapsed, setAllCollapsed] = useState(true);
   const [collapsedStates, setCollapsedStates] = useState<Record<string, boolean>>({});
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
-  // Initialize collapsed states
+  // Initialize collapsed states only on first render, not after user interactions
   useEffect(() => {
-    const initialStates: Record<string, boolean> = {};
-    collaborators.forEach(c => {
-      initialStates[c.id] = allCollapsed;
-    });
-    setCollapsedStates(initialStates);
-  }, [allCollapsed, collaborators]);
+    if (!hasUserInteracted) {
+      const initialStates: Record<string, boolean> = {};
+      collaborators.forEach(c => {
+        initialStates[c.id] = allCollapsed;
+      });
+      setCollapsedStates(initialStates);
+    }
+  }, [allCollapsed, collaborators, hasUserInteracted]);
 
   const toggleAllCollapsed = () => {
     const newAllCollapsed = !allCollapsed;
     setAllCollapsed(newAllCollapsed);
+    setHasUserInteracted(true);
     
     // Update all individual collapsed states
     const newStates: Record<string, boolean> = {};
@@ -43,6 +46,7 @@ const RecognitionSection = () => {
   };
 
   const toggleCollapsed = (id: string) => {
+    setHasUserInteracted(true);
     setCollapsedStates(prev => ({
       ...prev,
       [id]: !prev[id]
