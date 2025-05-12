@@ -37,7 +37,8 @@ import {
   Radar, 
   RadarChart, 
   PolarGrid, 
-  PolarAngleAxis, 
+  PolarAngleAxis,
+  PolarRadiusAxis,
   ResponsiveContainer 
 } from "recharts";
 import { 
@@ -106,6 +107,7 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
       .map(item => ({
         skill: item.skillInfo!.name,
         value: item.skillData.rating === "N/A" ? 0 : item.skillData.rating,
+        fullMark: 5,
         category: item.skillInfo!.category,
       }));
   };
@@ -415,6 +417,7 @@ const CollaboratorCard = ({ collaborator, defaultCollapsed = false }: Collaborat
                           <RadarChart data={chartData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
                             <PolarGrid />
                             <PolarAngleAxis dataKey="skill" />
+                            <PolarRadiusAxis domain={[0, 5]} />
                             <Radar
                               name="Habilidades"
                               dataKey="value"

@@ -8,6 +8,7 @@ import CollaboratorLegend from "./CollaboratorLegend";
 import AddCollaboratorDialog from "./AddCollaboratorDialog";
 import AddSkillsDialog from "./AddSkillsDialog";
 import EmptyCollaboratorsList from "./EmptyCollaboratorsList";
+import RecognitionCollapseButton from "../recognition/RecognitionCollapseButton";
 
 const CollaboratorsSection = () => {
   const { collaborators } = useSkillContext();
@@ -43,16 +44,10 @@ const CollaboratorsSection = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Colaboradores</h2>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={toggleAllCollapsed}
-            className="flex items-center gap-2"
-          >
-            {allCollapsed ? 
-              <><ArrowDown size={16} /> Expandir Todos</> : 
-              <><ArrowUp size={16} /> Recolher Todos</>
-            }
-          </Button>
+          <RecognitionCollapseButton 
+            allCollapsed={allCollapsed} 
+            onClick={toggleAllCollapsed} 
+          />
           <Button onClick={() => setIsDialogOpen(true)}>
             Adicionar Colaborador
           </Button>
