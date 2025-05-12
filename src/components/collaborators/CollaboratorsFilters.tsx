@@ -95,7 +95,7 @@ const CollaboratorsFilters = ({
               <SelectValue placeholder="Filtrar por equipe" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as equipes</SelectItem>
+              <SelectItem value="all">Todas as equipes</SelectItem>
               {teams.map((team) => (
                 <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
               ))}
@@ -107,7 +107,7 @@ const CollaboratorsFilters = ({
               <SelectValue placeholder="Filtrar por função" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as funções</SelectItem>
+              <SelectItem value="all">Todas as funções</SelectItem>
               {functionRoles.map((role) => (
                 <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
               ))}

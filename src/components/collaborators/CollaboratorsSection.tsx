@@ -22,8 +22,8 @@ const CollaboratorsSection = () => {
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState("");
-  const [teamFilter, setTeamFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [teamFilter, setTeamFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   // Aba ativa (atual ou comparativo)
@@ -59,10 +59,10 @@ const CollaboratorsSection = () => {
     const nameMatches = collaborator.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     // Filtra por equipe
-    const teamMatches = !teamFilter || collaborator.teamId === teamFilter;
+    const teamMatches = teamFilter === "all" || collaborator.teamId === teamFilter;
     
     // Filtra por função
-    const roleMatches = !roleFilter || collaborator.functionRoleId === roleFilter;
+    const roleMatches = roleFilter === "all" || collaborator.functionRoleId === roleFilter;
     
     return nameMatches && teamMatches && roleMatches;
   });
