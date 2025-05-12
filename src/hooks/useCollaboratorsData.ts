@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Collaborator, CollaboratorSkill } from "@/types/skills";
 import { generateId } from "@/utils/skillUtils";
@@ -15,26 +14,89 @@ interface MonthlyData {
   };
 }
 
+// Helper function to safely parse JSON with fallback
+const safeJSONParse = (str: string | null, fallback: any): any => {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error("Error parsing JSON from localStorage:", e);
+    return fallback;
+  }
+};
+
+// Helper function to safely store data in localStorage
+const safeLocalStorageSet = (key: string, value: any): boolean => {
+  try {
+    const serialized = JSON.stringify(value);
+    localStorage.setItem(key, serialized);
+    return true;
+  } catch (e) {
+    console.error(`Error storing data in localStorage (${key}):`, e);
+    return false;
+  }
+};
+
+// Maximum number of months to keep in history
+const MAX_HISTORY_MONTHS = 6;
+
 export const useCollaboratorsData = () => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>(() => {
     const saved = localStorage.getItem("collaborators");
-    return saved ? JSON.parse(saved) : [];
+    return safeJSONParse(saved, []);
   });
 
   // Estado para armazenar dados históricos por mês
   const [historicalData, setHistoricalData] = useState<Record<string, MonthlyData>>(() => {
     const saved = localStorage.getItem("historicalSkillsData");
-    return saved ? JSON.parse(saved) : {};
+    return safeJSONParse(saved, {});
   });
 
-  // Salva colaboradores atuais no localStorage
+  // Salva colaboradores atuais no localStorage com tratamento de erro
   useEffect(() => {
-    localStorage.setItem("collaborators", JSON.stringify(collaborators));
+    try {
+      // For large datasets, consider storing only essential data
+      const essentialData = collaborators.map(c => ({
+        id: c.id,
+        name: c.name,
+        photoUrl: c.photoUrl,
+        isPontoCentral: c.isPontoCentral,
+        isAptForRole: c.isAptForRole,
+        teamId: c.teamId,
+        functionRoleId: c.functionRoleId,
+        skills: c.skills
+      }));
+      
+      safeLocalStorageSet("collaborators", essentialData);
+    } catch (error) {
+      console.error("Failed to save collaborators to localStorage:", error);
+      // Consider showing a user-friendly notification here
+    }
   }, [collaborators]);
 
-  // Salva dados históricos no localStorage
+  // Salva dados históricos no localStorage com limite de meses
   useEffect(() => {
-    localStorage.setItem("historicalSkillsData", JSON.stringify(historicalData));
+    try {
+      // Limit the number of months stored in history
+      const monthKeys = Object.keys(historicalData).sort((a, b) => 
+        new Date(b).getTime() - new Date(a).getTime()
+      );
+      
+      // Keep only the MAX_HISTORY_MONTHS most recent months
+      if (monthKeys.length > MAX_HISTORY_MONTHS) {
+        const trimmedData = {} as Record<string, MonthlyData>;
+        monthKeys.slice(0, MAX_HISTORY_MONTHS).forEach(key => {
+          trimmedData[key] = historicalData[key];
+        });
+        
+        safeLocalStorageSet("historicalSkillsData", trimmedData);
+        setHistoricalData(trimmedData);
+      } else {
+        safeLocalStorageSet("historicalSkillsData", historicalData);
+      }
+    } catch (error) {
+      console.error("Failed to save historical data to localStorage:", error);
+    }
   }, [historicalData]);
 
   // Calcula métricas atuais baseadas nos colaboradores
@@ -84,18 +146,43 @@ export const useCollaboratorsData = () => {
     
     const metrics = calculateCurrentMetrics();
     
-    // Cria uma cópia profunda dos colaboradores atuais
-    const collaboratorsCopy = JSON.parse(JSON.stringify(collaborators));
-    
-    setHistoricalData(prev => ({
-      ...prev,
-      [monthKey]: {
-        collaborators: collaboratorsCopy,
-        metrics
-      }
-    }));
-    
-    return true;
+    try {
+      // Create a simplified version of collaborators for storage
+      // to reduce localStorage size
+      const simplifiedCollabs = collaborators.map(c => ({
+        id: c.id,
+        name: c.name,
+        skills: c.skills,
+        teamId: c.teamId,
+        functionRoleId: c.functionRoleId,
+        isAptForRole: c.isAptForRole
+      }));
+      
+      setHistoricalData(prev => {
+        // Remove oldest month if we're exceeding our limit
+        const updatedData = { ...prev };
+        const monthKeys = Object.keys(updatedData).sort();
+        
+        if (monthKeys.length >= MAX_HISTORY_MONTHS) {
+          // Remove oldest month
+          delete updatedData[monthKeys[0]];
+        }
+        
+        // Add new month
+        return {
+          ...updatedData,
+          [monthKey]: {
+            collaborators: simplifiedCollabs,
+            metrics
+          }
+        };
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving monthly snapshot:", error);
+      return false;
+    }
   };
 
   // Obtém dados do mês anterior para comparação
