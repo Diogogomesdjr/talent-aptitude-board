@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSkillContext } from "@/context/SkillContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -271,6 +270,7 @@ const InsightsSection = () => {
     return Object.values(teamInsights).filter(team => team.memberCount > 0);
   };
 
+  // Store the results of these functions in variables to use in the JSX
   const skillsNeedingDevelopment = getSkillsNeedingDevelopment();
   const collaboratorInsights = generateCollaboratorInsights();
   const teamInsights = generateTeamInsights();
@@ -345,7 +345,7 @@ const InsightsSection = () => {
           {/* Tab de desenvolvimento - mostra habilidades que precisam ser desenvolvidas */}
           <TabsContent value="development">
             <div className="space-y-8">
-              {Object.keys(skillsByCategory).length === 0 ? (
+              {Object.keys(skillsNeedingDevelopment).length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">Não há dados suficientes para análise. Adicione mais habilidades aos colaboradores.</p>
                 </div>
